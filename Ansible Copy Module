@@ -1,0 +1,30 @@
+There is data on jump host that needs to be copied on all application servers in Stratos DC. Nautilus DevOps team want to perform this task using Ansible. Perform the task as per details mentioned below:
+a. On jump host create an inventory file /home/thor/ansible/inventory and add all application servers as managed nodes.
+b. On jump host create a playbook /home/thor/ansible/playbook.yml to copy /usr/src/devops/index.html file to all application servers at location /opt/devops.
+Note: Validation will try to run the playbook using command ansible-playbook -i inventory playbook.yml so please make sure the playbook works this way without passing any extra arguments.
+
+1. Create inventory file as given below. 
+thor@jump_host ~/ansible$ cat inventory
+stapp01 ansible_connection=ssh ansible_user=tony ansible_ssh_pass=Ir0nM@n
+stapp02 ansible_connection=ssh ansible_user=steve ansible_ssh_pass=Am3ricA
+stapp03 ansible_connection=ssh ansible_user=banner ansible_ssh_pass=BigGr33n
+
+2. Check the invntory file is working fine using ansible ad-hoc command. 
+thor@jump_host ~/ansible$ ansible all -a uptime -i inventory
+
+3. Create playbook as given below. 
+thor@jump_host ~/ansible$ cat playbook.yml
+---
+  - hosts: stapp01, stapp02, stapp03
+    become: true
+    become_user: root
+    gather_facts: no
+    tasks:
+    - name: Copy web pages
+      copy: src=/usr/src/devops/index.html dest=/opt/devops
+
+4. Check the syntax of playbook.
+thor@jump_host ~/ansible$ ansible-playbook playbook.yml --syntax-check -i inventory
+
+5. if everything is fine execute the playbook. 
+thor@jump_host ~/ansible$ ansible-playbook playbook.yml -i inventory
