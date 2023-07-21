@@ -1,0 +1,32 @@
+Some new changes need to be made on some of the app servers in Stratos Datacenter. There are some packages that need to be installed on the app server 2. We want to install these packages using puppet only.
+Puppet master is already installed on Jump Server.
+Create a puppet programming file ecommerce.pp under /etc/puppetlabs/code/environments/production/manifests on master node i.e on Jump Server and perform below mentioned tasks using the same.
+Define a class multi_package_node for agent node 2 i.e app server 2. Install vim-enhanced and zip packages on the agent node 2.
+
+Solution: 
+1. Create the manifests file as given below 
+root@jump_host /etc/puppetlabs/code/environments/production/manifests# cat ecommerce.pp 
+class mutli_package_node {
+  $packages = ['vim-enhanced','zip',]
+  package  {   $packages:
+     ensure   => 'installed',
+      provider => 'yum',
+  }
+}
+node 'stapp02.stratos.xfusioncorp.com' {
+  include mutli_package_node
+}
+
+2. Validate the manifest file 
+root@jump_host /etc/puppetlabs/code/environments/production/manifests# puppet parser validate ecommerce.pp 
+root@jump_host /etc/puppetlabs/code/environments/production/manifests# 
+
+3. Login to App servers
+[root@stapp02 ~]# puppet agent -tv
+
+Notice: /Stage[main]/Mutli_package_node/Package[vim-enhanced]/ensure: created
+Notice: /Stage[main]/Mutli_package_node/Package[zip]/ensure: created
+Notice: Applied catalog in 60.84 seconds 
+
+4. Check the packages. 
+[root@stapp02 ~]# yum list installed | grep -E 'vim-enhanced|zip'
